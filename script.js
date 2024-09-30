@@ -134,28 +134,29 @@ function setupFieldNavigation() {
     const partNoField = document.getElementById('partNo');
     const qtyField = document.getElementById('qty');
 
-    // Move from Location to Part No
-    locationField.addEventListener('keydown', function(event) {
+    // Helper function to handle Enter/Tab key navigation
+    function handleKeyNavigation(event, nextField) {
         if (event.key === 'Enter' || event.key === 'Tab') {
             event.preventDefault(); // Prevent default tab behavior
-            partNoField.focus(); // Move focus to Part No
+            nextField.focus(); // Move focus to the next field
         }
+    }
+
+    // Move from Location to Part No
+    locationField.addEventListener('keydown', function(event) {
+        handleKeyNavigation(event, partNoField);
     });
 
     // Move from Part No to Qty
     partNoField.addEventListener('keydown', function(event) {
-        if (event.key === 'Enter' || event.key === 'Tab') {
-            event.preventDefault(); // Prevent default tab behavior
-            qtyField.focus(); // Move focus to Qty
-        }
+        handleKeyNavigation(event, qtyField);
     });
 
-    // Move from Qty back to Location after saving data
+    // Save data and move back to Location from Qty
     qtyField.addEventListener('keydown', function(event) {
         if (event.key === 'Enter' || event.key === 'Tab') {
             event.preventDefault(); // Prevent default tab behavior
             storeFormData();  // Save the data when Qty is entered
-            locationField.focus(); // Move focus back to Location for new entry
         }
     });
 }
