@@ -86,7 +86,7 @@ function padText(text, width) {
     return text.padEnd(width, ' '); // Right-pad the text with spaces
 }
 
-// Function to send email with text data
+// Function to send email with text data and log detailed errors
 function sendEmailWithText() {
     const textContent = generateTextContent(); // Generate the text content from form data
     const referenceNo = document.getElementById('referenceNo').value; // Get the current reference number
@@ -104,8 +104,8 @@ function sendEmailWithText() {
             console.log('Email sent successfully', response.status, response.text);
             alert("Email has been sent successfully!");
         }, function(error) {
-            console.error('Failed to send email', error);
-            alert("Failed to send email. Please try again.");
+            console.error('Failed to send email. Error details:', error);
+            alert(`Failed to send email. Error: ${error.text || error}`);
         });
 }
 
