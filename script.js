@@ -55,11 +55,21 @@ function populateForm(entry) {
 
 // Function to reset the form while keeping Reference No, Date, and Branch
 function resetForm() {
+    referenceNo = generateReferenceNo();  // Generate new reference no
+    dateTime = getCurrentDateTime();      // Generate new date and time
     document.getElementById('referenceNo').value = referenceNo;
     document.getElementById('dateTime').value = dateTime;
+    document.getElementById('branch').value = '';
     document.getElementById('location').value = '';
     document.getElementById('partNo').value = '';
     document.getElementById('qty').value = '';
+}
+
+// Clear all form data and reset for new input
+function clearFormData() {
+    entries = []; // Clear entries array
+    saveEntries([]); // Clear entries from local storage
+    resetForm(); // Reset the form
 }
 
 // Store form data to local storage and prepare the form for a new entry
@@ -83,7 +93,6 @@ function storeFormData() {
     }
 
     saveEntries(entries); // Save entries to local storage
-    resetForm(); // Clear form fields except Reference No, Date, and Branch
 }
 
 // Generate CSV content from the form entries
@@ -144,7 +153,8 @@ function sendEmailWithCSV() {
             console.log('Email sent successfully', response.status, response.text);
             alert("Email has been sent successfully!");
         }, function(error) {
-            console.log('Failed to send email', error);
+            console.error('Failed to send email', error);
+            alert("Failed to send email. Please try again.");
         });
 }
 
@@ -159,11 +169,8 @@ document.getElementById('submitBtn').addEventListener('click', function() {
     // Download the form data as a note file (formatted as a table)
     downloadTextFile("form_data.txt", tableText);
 
-    // Clear all entries after submission and reset the form for new data
-    entries = [];
-    referenceNo = generateReferenceNo();
-    dateTime = getCurrentDateTime();
-    resetForm();
+    // Clear all form data after submission and reset the form for new data
+    clearFormData();
 });
 
 // Automatically focus on the "Branch" field when the form loads
