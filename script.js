@@ -49,7 +49,7 @@ function resetForm() {
     document.getElementById('qty').value = '';
 }
 
-// Function to store form data and clear fields
+// Store form data and clear relevant fields
 function storeFormData() {
     const newEntry = {
         referenceNo: document.getElementById('referenceNo').value,
@@ -91,14 +91,14 @@ function sendEmailWithText() {
     const textContent = generateTextContent(); // Generate the text content from form data
     const referenceNo = document.getElementById('referenceNo').value; // Get the current reference number
 
-    // Params object to pass to EmailJS
+    // Email parameters
     const params = {
         to_email: "asif.s@ekkanoo.com.bh,Abdul.R@Ekkanoo.com.bh,enrico.b@Ekkanoo.com.bh,fadhel.h@Ekkanoo.com.bh", // Multiple recipients
         subject: `SOP-Binning ${referenceNo}`, // Dynamic subject with reference number
         message: textContent  // The message body, sent as plain text
     };
 
-    // Use EmailJS to send the email
+    // Send the email using EmailJS
     emailjs.send("service_s2ro656", "template_nox6zuh", params)
         .then(function(response) {
             console.log('Email sent successfully', response.status, response.text);
