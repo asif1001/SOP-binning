@@ -70,29 +70,29 @@ function storeFormData() {
     document.getElementById('location').focus();  // Move focus back to Location
 }
 
-// Function to generate text content for the email
+// Function to generate text content for the email (in a key-value pair format, like we did in the battery project)
 function generateTextContent() {
-    let header = `| ${padText('Reference No', 15)} | ${padText('Date', 20)} | ${padText('Branch', 15)} | ${padText('Location', 15)} | ${padText('Part No', 15)} | ${padText('Qty', 5)} |\n`;
-    let separator = `| ${'-'.repeat(15)} | ${'-'.repeat(20)} | ${'-'.repeat(15)} | ${'-'.repeat(15)} | ${'-'.repeat(15)} | ${'-'.repeat(5)} |\n`;
-    let textContent = header + separator;
-    
-    // Iterate over each saved entry and format it as a table row
-    entries.forEach(entry => {
-        textContent += `| ${padText(entry.referenceNo, 15)} | ${padText(entry.dateTime, 20)} | ${padText(entry.branch, 15)} | ${padText(entry.location, 15)} | ${padText(entry.partNo, 15)} | ${padText(entry.qty, 5)} |\n`;
-    });
-    return textContent;
-}
+    let textContent = `SOP Binning Data:\n\n`;
 
-// Helper function to pad text for table alignment in email
-function padText(text, width) {
-    return text.padEnd(width, ' '); // Right-pad the text with spaces for proper table alignment
+    // Iterate over each saved entry and append it as key-value pairs
+    entries.forEach(entry => {
+        textContent += `Reference No: ${entry.referenceNo}\n`;
+        textContent += `Date/Time: ${entry.dateTime}\n`;
+        textContent += `Branch: ${entry.branch}\n`;
+        textContent += `Location: ${entry.location}\n`;
+        textContent += `Part No: ${entry.partNo}\n`;
+        textContent += `Qty: ${entry.qty}\n`;
+        textContent += `-------------------------\n`; // Separator for each entry
+    });
+
+    return textContent;
 }
 
 // Function to send email with the collected form data using EmailJS
 function sendEmailWithText() {
     const referenceNo = document.getElementById('referenceNo').value; // Get the current reference number
 
-    // Collect all form data and format it into a table
+    // Collect all form data and format it into key-value pairs
     const emailContent = generateTextContent(); // Generate the email content from saved form data
 
     // EmailJS params for sending the email
@@ -118,7 +118,7 @@ document.getElementById('submitBtn').addEventListener('click', function() {
     sendEmailWithText();  // Send the collected form data via email
 });
 
-// Function to download all saved data as a text file
+// Function to download all saved data as a text file (Optional)
 document.getElementById('downloadBtn').addEventListener('click', function() {
     const textContent = generateTextContent(); // Generate text content for download
     downloadTextFile("form_data.txt", textContent); // Download the text file with all form data
