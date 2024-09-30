@@ -95,7 +95,7 @@ function generateCSV() {
     return csvContent;
 }
 
-// Download form data as a text file
+// Function to download form data as a formatted text table
 function downloadTextFile(filename, text) {
     const element = document.createElement('a');
     element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(text));
@@ -105,7 +105,29 @@ function downloadTextFile(filename, text) {
     document.body.removeChild(element);
 }
 
-// Send form data as an email with CSV content using EmailJS
+// Function to format text data as a table for the note file
+function generateTableText() {
+    // Define headers and set fixed widths for each column
+    const header = `| ${padText('Reference No', 15)} | ${padText('Date', 20)} | ${padText('Branch', 15)} | ${padText('Location', 15)} | ${padText('Part No', 15)} | ${padText('Qty', 6)} |\n`;
+    const separator = `| ${'-'.repeat(15)} | ${'-'.repeat(20)} | ${'-'.repeat(15)} | ${'-'.repeat(15)} | ${'-'.repeat(15)} | ${'-'.repeat(6)} |\n`;
+
+    let tableText = header + separator;
+
+    // Format each entry in a row
+    entries.forEach(entry => {
+        const row = `| ${padText(entry.referenceNo, 15)} | ${padText(entry.dateTime, 20)} | ${padText(entry.branch, 15)} | ${padText(entry.location, 15)} | ${padText(entry.partNo, 15)} | ${padText(entry.qty, 6)} |\n`;
+        tableText += row;
+    });
+
+    return tableText;
+}
+
+// Helper function to pad text with spaces to ensure proper alignment
+function padText(text, width) {
+    return text.padEnd(width, ' '); // Add spaces to the right to ensure consistent column width
+}
+
+// Function to send email with CSV data
 function sendEmailWithCSV() {
     const csvContent = generateCSV(); // Generate the CSV content from form data
     const referenceNo = document.getElementById('referenceNo').value; // Get the current reference number
@@ -131,9 +153,11 @@ document.getElementById('submitBtn').addEventListener('click', function() {
     // Send email with form data in CSV format
     sendEmailWithCSV();
 
-    // Download the form data as a text file
-    const textData = JSON.stringify(entries, null, 2);
-    downloadTextFile("form_data.txt", textData);
+    // Generate the table-formatted text
+    const tableText = generateTableText();
+    
+    // Download the form data as a note file (formatted as a table)
+    downloadTextFile("form_data.txt", tableText);
 
     // Clear all entries after submission and reset the form for new data
     entries = [];
