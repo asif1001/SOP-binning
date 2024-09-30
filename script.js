@@ -83,28 +83,20 @@ function storeFormData() {
         qty: document.getElementById('qty').value
     };
 
-    if (entries[currentIndex]) {
-        // Update the current entry
-        entries[currentIndex] = newEntry;
-    } else {
-        // Add a new entry
-        entries.push(newEntry);
-        currentIndex = entries.length - 1; // Move index to the latest entry
-    }
-
-    saveEntries(entries); // Save entries to local storage
+    entries.push(newEntry);  // Add a new entry
+    saveEntries(entries);    // Save entries to local storage
 }
 
-// Generate CSV content from the form entries
-function generateCSV() {
-    let csvContent = "Reference No,Date,Branch,Location,Part No,Qty\n";
+// Generate Text content from the form entries for email and download
+function generateTextContent() {
+    let textContent = "Reference No\tDate\tBranch\tLocation\tPart No\tQty\n";
     entries.forEach(entry => {
-        csvContent += `${entry.referenceNo},${entry.dateTime},${entry.branch},${entry.location},${entry.partNo},${entry.qty}\n`;
+        textContent += `${entry.referenceNo}\t${entry.dateTime}\t${entry.branch}\t${entry.location}\t${entry.partNo}\t${entry.qty}\n`;
     });
-    return csvContent;
+    return textContent;
 }
 
-// Function to download form data as a formatted text table
+// Function to download form data as a text file
 function downloadTextFile(filename, text) {
     const element = document.createElement('a');
     element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(text));
@@ -114,37 +106,15 @@ function downloadTextFile(filename, text) {
     document.body.removeChild(element);
 }
 
-// Function to format text data as a table for the note file
-function generateTableText() {
-    // Define headers and set fixed widths for each column
-    const header = `| ${padText('Reference No', 15)} | ${padText('Date', 20)} | ${padText('Branch', 15)} | ${padText('Location', 15)} | ${padText('Part No', 15)} | ${padText('Qty', 6)} |\n`;
-    const separator = `| ${'-'.repeat(15)} | ${'-'.repeat(20)} | ${'-'.repeat(15)} | ${'-'.repeat(15)} | ${'-'.repeat(15)} | ${'-'.repeat(6)} |\n`;
-
-    let tableText = header + separator;
-
-    // Format each entry in a row
-    entries.forEach(entry => {
-        const row = `| ${padText(entry.referenceNo, 15)} | ${padText(entry.dateTime, 20)} | ${padText(entry.branch, 15)} | ${padText(entry.location, 15)} | ${padText(entry.partNo, 15)} | ${padText(entry.qty, 6)} |\n`;
-        tableText += row;
-    });
-
-    return tableText;
-}
-
-// Helper function to pad text with spaces to ensure proper alignment
-function padText(text, width) {
-    return text.padEnd(width, ' '); // Add spaces to the right to ensure consistent column width
-}
-
-// Function to send email with CSV data
-function sendEmailWithCSV() {
-    const csvContent = generateCSV(); // Generate the CSV content from form data
+// Function to send email with text data
+function sendEmailWithText() {
+    const textContent = generateTextContent(); // Generate the text content from form data
     const referenceNo = document.getElementById('referenceNo').value; // Get the current reference number
 
     const params = {
         to_email: "asif.s@ekkanoo.com.bh,Abdul.R@Ekkanoo.com.bh,enrico.b@Ekkanoo.com.bh,fadhel.h@Ekkanoo.com.bh", // Multiple recipients
         subject: `SOP-Binning ${referenceNo}`, // Dynamic subject with reference number
-        message_html: csvContent // CSV content will be placed in the email body
+        message_html: textContent.replace(/\n/g, '<br>') // Convert newlines to <br> for email formatting
     };
 
     // Use EmailJS to send the email
@@ -160,14 +130,17 @@ function sendEmailWithCSV() {
 
 // Submit button event listener to trigger email and save actions
 document.getElementById('submitBtn').addEventListener('click', function() {
-    // Send email with form data in CSV format
-    sendEmailWithCSV();
+    // Store the current form data
+    storeFormData();
 
-    // Generate the table-formatted text
-    const tableText = generateTableText();
+    // Generate the text-formatted data
+    const textContent = generateTextContent();
     
-    // Download the form data as a note file (formatted as a table)
-    downloadTextFile("form_data.txt", tableText);
+    // Download the form data as a note file (formatted as text)
+    downloadTextFile("form_data.txt", textContent);
+
+    // Send the form data via email in text format
+    sendEmailWithText();
 
     // Clear all form data after submission and reset the form for new data
     clearFormData();
