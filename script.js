@@ -1,9 +1,9 @@
-// Initialize EmailJS
+// Initialize EmailJS with your User ID (Public Key)
 (function(){
-    emailjs.init("YOUR_USER_ID"); // Replace with your EmailJS user ID
+    emailjs.init("H1NlmM-K_eGlclzfa"); // Replace with your actual User ID (Public Key)
 })();
 
-// Function to generate the reference number
+// Function to generate the reference number (YearMonthDayHourMinute)
 function generateReferenceNo() {
     const now = new Date();
     const year = now.getFullYear();
@@ -14,24 +14,24 @@ function generateReferenceNo() {
     return `${year}${month}${date}${hours}${minutes}`;
 }
 
-// Function to get the current date and time in a readable format
+// Function to get the current date and time
 function getCurrentDateTime() {
     const now = new Date();
     return now.toLocaleString(); // This will return the date and time in local format
 }
 
-// Function to load entries from local storage
+// Function to load form entries from local storage
 function loadEntries() {
     const entries = JSON.parse(localStorage.getItem('entries')) || [];
     return entries;
 }
 
-// Function to save entries to local storage
+// Function to save form entries to local storage
 function saveEntries(entries) {
     localStorage.setItem('entries', JSON.stringify(entries));
 }
 
-// Initialize form and load the first entry
+// Initialize form and load the last entry
 let currentIndex = 0;
 let entries = loadEntries();
 let referenceNo = generateReferenceNo();
@@ -43,7 +43,7 @@ if (entries.length > 0) {
     resetForm();
 }
 
-// Function to populate the form with an entry
+// Function to populate the form with the current entry data
 function populateForm(entry) {
     document.getElementById('referenceNo').value = entry.referenceNo;
     document.getElementById('dateTime').value = entry.dateTime;
@@ -62,7 +62,7 @@ function resetForm() {
     document.getElementById('qty').value = '';
 }
 
-// Function to store form data in local storage and reset the form for a new entry
+// Store form data to local storage and prepare the form for a new entry
 function storeFormData() {
     const newEntry = {
         referenceNo: document.getElementById('referenceNo').value,
@@ -74,19 +74,19 @@ function storeFormData() {
     };
 
     if (entries[currentIndex]) {
-        // If the current entry is being edited, update it
+        // Update the current entry
         entries[currentIndex] = newEntry;
     } else {
-        // Otherwise, add a new entry
+        // Add a new entry
         entries.push(newEntry);
         currentIndex = entries.length - 1; // Move index to the latest entry
     }
 
-    saveEntries(entries); // Save updated entries to local storage
+    saveEntries(entries); // Save entries to local storage
     resetForm(); // Clear form fields except Reference No, Date, and Branch
 }
 
-// Function to generate CSV content from entries
+// Generate CSV content from the form entries
 function generateCSV() {
     let csvContent = "Reference No,Date,Branch,Location,Part No,Qty\n";
     entries.forEach(entry => {
@@ -95,7 +95,7 @@ function generateCSV() {
     return csvContent;
 }
 
-// Function to download data as a text file
+// Download form data as a text file
 function downloadTextFile(filename, text) {
     const element = document.createElement('a');
     element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(text));
@@ -105,16 +105,17 @@ function downloadTextFile(filename, text) {
     document.body.removeChild(element);
 }
 
-// Function to send email with CSV data
+// Send form data as an email with CSV content using EmailJS
 function sendEmailWithCSV() {
-    const csvContent = generateCSV();
+    const csvContent = generateCSV(); // Generate the CSV content from form data
+    
     const params = {
-        to_email: "recipient@example.com", // Replace with recipient's email
-        message_html: "Please find the attached form entries in CSV format.",
-        attachment: csvContent
+        to_email: "recipient@example.com", // Replace with the actual recipient's email
+        message_html: csvContent // CSV content will be placed in the email body
     };
 
-    emailjs.send("YOUR_SERVICE_ID", "YOUR_TEMPLATE_ID", params)
+    // Use EmailJS to send the email
+    emailjs.send("service_s2ro656", "template_nox6zuh", params)
         .then(function(response) {
             console.log('Email sent successfully', response.status, response.text);
             alert("Email has been sent successfully!");
@@ -123,28 +124,28 @@ function sendEmailWithCSV() {
         });
 }
 
-// Event handler for Submit button
+// Submit button event listener to trigger email and save actions
 document.getElementById('submitBtn').addEventListener('click', function() {
-    // Send email with CSV data
+    // Send email with form data in CSV format
     sendEmailWithCSV();
 
-    // Save data as text file
+    // Download the form data as a text file
     const textData = JSON.stringify(entries, null, 2);
     downloadTextFile("form_data.txt", textData);
 
-    // Reset form after submission
-    entries = []; // Clear all entries after submission
+    // Clear all entries after submission and reset the form for new data
+    entries = [];
     referenceNo = generateReferenceNo();
     dateTime = getCurrentDateTime();
     resetForm();
 });
 
-// Automatically focus on the "Branch" field only the first time the form is loaded
+// Automatically focus on the "Branch" field when the form loads
 window.onload = function() {
     document.getElementById('branch').focus();
 };
 
-// Function to handle tab and enter key events
+// Handle Tab/Enter key navigation between form fields
 function handleTabAndEnterNavigation(currentField, nextField) {
     currentField.addEventListener('keydown', function(event) {
         if (event.key === 'Enter' || event.key === 'Tab') {
@@ -154,35 +155,35 @@ function handleTabAndEnterNavigation(currentField, nextField) {
     });
 }
 
-// Set up navigation between fields
+// Set up field navigation: Branch -> Location -> Part No -> Qty -> Location
 handleTabAndEnterNavigation(document.getElementById('branch'), document.getElementById('location'));
 handleTabAndEnterNavigation(document.getElementById('location'), document.getElementById('partNo'));
 handleTabAndEnterNavigation(document.getElementById('partNo'), document.getElementById('qty'));
 
-// After filling Qty, move the cursor back to Location and store data
+// After filling Qty, move back to Location and store the data
 document.getElementById('qty').addEventListener('keydown', function(event) {
     if (event.key === 'Enter' || event.key === 'Tab') {
         event.preventDefault(); // Prevent default tab behavior
-        storeFormData(); // Store data when moving back after Qty is filled
+        storeFormData(); // Store the data in local storage
         document.getElementById('location').focus(); // Move focus back to Location
     }
 });
 
-// Event handler for Previous button
+// Handle Previous button to show the last entered data
 document.getElementById('prevBtn').addEventListener('click', function() {
     if (currentIndex > 0) {
         currentIndex--;
-        populateForm(entries[currentIndex]); // Show previous entry
+        populateForm(entries[currentIndex]); // Show the previous entry
     } else {
         alert('No previous entries.');
     }
 });
 
-// Event handler for Next button
+// Handle Next button to show the next data entry or reset the form
 document.getElementById('nextBtn').addEventListener('click', function() {
     if (currentIndex < entries.length - 1) {
         currentIndex++;
-        populateForm(entries[currentIndex]); // Show next entry
+        populateForm(entries[currentIndex]); // Show the next entry
     } else {
         resetForm(); // Prepare for new entry if no next entry exists
     }
