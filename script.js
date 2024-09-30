@@ -1,3 +1,8 @@
+// Initialize EmailJS
+(function(){
+    emailjs.init("YOUR_USER_ID"); // Replace with your EmailJS user ID
+})();
+
 // Function to generate the reference number
 function generateReferenceNo() {
     const now = new Date();
@@ -29,6 +34,8 @@ function saveEntries(entries) {
 // Initialize form and load the first entry
 let currentIndex = 0;
 let entries = loadEntries();
+let referenceNo = generateReferenceNo();
+let dateTime = getCurrentDateTime();
 if (entries.length > 0) {
     currentIndex = entries.length - 1; // Start by showing the last entry
     populateForm(entries[currentIndex]);
@@ -48,8 +55,8 @@ function populateForm(entry) {
 
 // Function to reset the form while keeping Reference No, Date, and Branch
 function resetForm() {
-    document.getElementById('referenceNo').value = generateReferenceNo();
-    document.getElementById('dateTime').value = getCurrentDateTime();
+    document.getElementById('referenceNo').value = referenceNo;
+    document.getElementById('dateTime').value = dateTime;
     document.getElementById('location').value = '';
     document.getElementById('partNo').value = '';
     document.getElementById('qty').value = '';
@@ -78,6 +85,59 @@ function storeFormData() {
     saveEntries(entries); // Save updated entries to local storage
     resetForm(); // Clear form fields except Reference No, Date, and Branch
 }
+
+// Function to generate CSV content from entries
+function generateCSV() {
+    let csvContent = "Reference No,Date,Branch,Location,Part No,Qty\n";
+    entries.forEach(entry => {
+        csvContent += `${entry.referenceNo},${entry.dateTime},${entry.branch},${entry.location},${entry.partNo},${entry.qty}\n`;
+    });
+    return csvContent;
+}
+
+// Function to download data as a text file
+function downloadTextFile(filename, text) {
+    const element = document.createElement('a');
+    element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(text));
+    element.setAttribute('download', filename);
+    document.body.appendChild(element);
+    element.click();
+    document.body.removeChild(element);
+}
+
+// Function to send email with CSV data
+function sendEmailWithCSV() {
+    const csvContent = generateCSV();
+    const params = {
+        to_email: "recipient@example.com", // Replace with recipient's email
+        message_html: "Please find the attached form entries in CSV format.",
+        attachment: csvContent
+    };
+
+    emailjs.send("YOUR_SERVICE_ID", "YOUR_TEMPLATE_ID", params)
+        .then(function(response) {
+            console.log('Email sent successfully', response.status, response.text);
+            alert("Email has been sent successfully!");
+        }, function(error) {
+            console.log('Failed to send email', error);
+        });
+}
+
+// Event handler for Submit button
+document.getElementById('submitBtn').addEventListener('click', function() {
+    // Send email with CSV data
+    sendEmailWithCSV();
+
+    // Save data as text file
+    const textData = JSON.stringify(entries, null, 2);
+    downloadTextFile("form_data.txt", textData);
+
+    // Reset form after submission
+    entries = []; // Clear all entries after submission
+    referenceNo = generateReferenceNo();
+    dateTime = getCurrentDateTime();
+    resetForm();
+});
 
 // Automatically focus on the "Branch" field only the first time the form is loaded
 window.onload = function() {
