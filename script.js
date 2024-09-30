@@ -37,16 +37,6 @@ let referenceNo = generateReferenceNo();
 let dateTime = getCurrentDateTime();
 resetForm();  // Ensure all fields except Reference No and Date/Time are empty
 
-// Function to populate the form with the current entry data
-function populateForm(entry) {
-    document.getElementById('referenceNo').value = entry.referenceNo;
-    document.getElementById('dateTime').value = entry.dateTime;
-    document.getElementById('branch').value = entry.branch;
-    document.getElementById('location').value = entry.location;
-    document.getElementById('partNo').value = entry.partNo;
-    document.getElementById('qty').value = entry.qty;
-}
-
 // Function to reset the form while keeping Reference No, Date, and Branch
 function resetForm() {
     referenceNo = generateReferenceNo();  // Generate new reference no
@@ -59,7 +49,7 @@ function resetForm() {
     document.getElementById('qty').value = '';
 }
 
-// Store form data in local storage and clear relevant fields
+// Function to store form data and clear fields
 function storeFormData() {
     const newEntry = {
         referenceNo: document.getElementById('referenceNo').value,
@@ -80,7 +70,7 @@ function storeFormData() {
     document.getElementById('location').focus();  // Move focus back to Location
 }
 
-// Generate text content from the form entries in a table format
+// Function to generate text content for the email
 function generateTextContent() {
     let header = `| ${padText('Reference No', 15)} | ${padText('Date', 20)} | ${padText('Branch', 15)} | ${padText('Location', 15)} | ${padText('Part No', 15)} | ${padText('Qty', 5)} |\n`;
     let separator = `| ${'-'.repeat(15)} | ${'-'.repeat(20)} | ${'-'.repeat(15)} | ${'-'.repeat(15)} | ${'-'.repeat(15)} | ${'-'.repeat(5)} |\n`;
@@ -96,25 +86,16 @@ function padText(text, width) {
     return text.padEnd(width, ' '); // Right-pad the text with spaces
 }
 
-// Function to download form data as a text file
-function downloadTextFile(filename, text) {
-    const element = document.createElement('a');
-    element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(text));
-    element.setAttribute('download', filename);
-    document.body.appendChild(element);
-    element.click();
-    document.body.removeChild(element);
-}
-
 // Function to send email with text data
 function sendEmailWithText() {
     const textContent = generateTextContent(); // Generate the text content from form data
     const referenceNo = document.getElementById('referenceNo').value; // Get the current reference number
 
+    // Params object to pass to EmailJS
     const params = {
         to_email: "asif.s@ekkanoo.com.bh,Abdul.R@Ekkanoo.com.bh,enrico.b@Ekkanoo.com.bh,fadhel.h@Ekkanoo.com.bh", // Multiple recipients
         subject: `SOP-Binning ${referenceNo}`, // Dynamic subject with reference number
-        message_html: textContent.replace(/\n/g, '<br>') // Convert newlines to <br> for email formatting
+        message: textContent  // The message body, sent as plain text
     };
 
     // Use EmailJS to send the email
