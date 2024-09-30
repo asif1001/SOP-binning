@@ -75,38 +75,63 @@ function generateTextContent() {
     let header = `| ${padText('Reference No', 15)} | ${padText('Date', 20)} | ${padText('Branch', 15)} | ${padText('Location', 15)} | ${padText('Part No', 15)} | ${padText('Qty', 5)} |\n`;
     let separator = `| ${'-'.repeat(15)} | ${'-'.repeat(20)} | ${'-'.repeat(15)} | ${'-'.repeat(15)} | ${'-'.repeat(15)} | ${'-'.repeat(5)} |\n`;
     let textContent = header + separator;
+    
+    // Iterate over each saved entry and format it as a table row
     entries.forEach(entry => {
         textContent += `| ${padText(entry.referenceNo, 15)} | ${padText(entry.dateTime, 20)} | ${padText(entry.branch, 15)} | ${padText(entry.location, 15)} | ${padText(entry.partNo, 15)} | ${padText(entry.qty, 5)} |\n`;
     });
     return textContent;
 }
 
-// Helper function to pad text for table alignment
+// Helper function to pad text for table alignment in email
 function padText(text, width) {
-    return text.padEnd(width, ' '); // Right-pad the text with spaces
+    return text.padEnd(width, ' '); // Right-pad the text with spaces for proper table alignment
 }
 
-// Function to send email with text data and log detailed errors
+// Function to send email with the collected form data using EmailJS
 function sendEmailWithText() {
-    const textContent = generateTextContent(); // Generate the text content from form data
     const referenceNo = document.getElementById('referenceNo').value; // Get the current reference number
 
-    // Email parameters
+    // Collect all form data and format it into a table
+    const emailContent = generateTextContent(); // Generate the email content from saved form data
+
+    // EmailJS params for sending the email
     const params = {
         to_email: "asif.s@ekkanoo.com.bh,Abdul.R@Ekkanoo.com.bh,enrico.b@Ekkanoo.com.bh,fadhel.h@Ekkanoo.com.bh", // Multiple recipients
         subject: `SOP-Binning ${referenceNo}`, // Dynamic subject with reference number
-        message: textContent  // The message body, sent as plain text
+        message: emailContent  // The email body, with all saved data
     };
 
-    // Send the email using EmailJS
+    // Use EmailJS to send the email
     emailjs.send("service_s2ro656", "template_nox6zuh", params)
         .then(function(response) {
             console.log('Email sent successfully', response.status, response.text);
-            alert("Email has been sent successfully!");
+            alert("Email has been sent successfully!"); // Notify the user
         }, function(error) {
             console.error('Failed to send email. Error details:', error);
-            alert(`Failed to send email. Error: ${error.text || error}`);
+            alert("Failed to send email. Please try again."); // Notify the user of failure
         });
+}
+
+// Event listener for the Submit button to send email
+document.getElementById('submitBtn').addEventListener('click', function() {
+    sendEmailWithText();  // Send the collected form data via email
+});
+
+// Function to download all saved data as a text file
+document.getElementById('downloadBtn').addEventListener('click', function() {
+    const textContent = generateTextContent(); // Generate text content for download
+    downloadTextFile("form_data.txt", textContent); // Download the text file with all form data
+});
+
+// Helper function to trigger file download
+function downloadTextFile(filename, text) {
+    const element = document.createElement('a');
+    element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(text));
+    element.setAttribute('download', filename);
+    document.body.appendChild(element);
+    element.click();
+    document.body.removeChild(element);
 }
 
 // Field navigation: from Location -> Part No -> Qty
@@ -147,14 +172,3 @@ window.onload = function() {
     document.getElementById('branch').focus();  // Automatically focus on Branch field when form loads
     setupFieldNavigation();  // Set up the sequence of cursor movement
 };
-
-// Download button event listener to download all saved entries in a text file
-document.getElementById('downloadBtn').addEventListener('click', function() {
-    const textContent = generateTextContent();
-    downloadTextFile("form_data.txt", textContent);
-});
-
-// Submit button event listener to send the saved data via email
-document.getElementById('submitBtn').addEventListener('click', function() {
-    sendEmailWithText();  // Send the saved data via email
-});
