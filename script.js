@@ -59,12 +59,12 @@ function resetForm() {
     document.getElementById('qty').value = '';
 }
 
-// Function to clear location, partNo, and qty fields
-function clearFields() {
+// Clear location, part no, and qty fields when the cursor enters the location field
+document.getElementById('location').addEventListener('focus', function() {
     document.getElementById('location').value = '';
     document.getElementById('partNo').value = '';
     document.getElementById('qty').value = '';
-}
+});
 
 // Store form data to local storage and prepare the form for a new entry
 function storeFormData() {
@@ -81,13 +81,20 @@ function storeFormData() {
     saveEntries(entries);    // Save entries to local storage
 }
 
-// Generate Text content from the form entries for download and email
+// Generate Text content from the form entries in a table format
 function generateTextContent() {
-    let textContent = "Reference No\tDate\tBranch\tLocation\tPart No\tQty\n";
+    let header = `| ${padText('Reference No', 15)} | ${padText('Date', 20)} | ${padText('Branch', 15)} | ${padText('Location', 15)} | ${padText('Part No', 15)} | ${padText('Qty', 5)} |\n`;
+    let separator = `| ${'-'.repeat(15)} | ${'-'.repeat(20)} | ${'-'.repeat(15)} | ${'-'.repeat(15)} | ${'-'.repeat(15)} | ${'-'.repeat(5)} |\n`;
+    let textContent = header + separator;
     entries.forEach(entry => {
-        textContent += `${entry.referenceNo}\t${entry.dateTime}\t${entry.branch}\t${entry.location}\t${entry.partNo}\t${entry.qty}\n`;
+        textContent += `| ${padText(entry.referenceNo, 15)} | ${padText(entry.dateTime, 20)} | ${padText(entry.branch, 15)} | ${padText(entry.location, 15)} | ${padText(entry.partNo, 15)} | ${padText(entry.qty, 5)} |\n`;
     });
     return textContent;
+}
+
+// Helper function to pad text for table alignment
+function padText(text, width) {
+    return text.padEnd(width, ' '); // Right-pad the text with spaces
 }
 
 // Function to download form data as a text file
@@ -127,7 +134,7 @@ document.getElementById('qty').addEventListener('keydown', function(event) {
     if (event.key === 'Enter' || event.key === 'Tab') {
         event.preventDefault(); // Prevent default tab behavior
         storeFormData();  // Save the data when Qty is entered
-        clearFields();    // Clear fields for new entry
+        document.getElementById('location').focus(); // Move focus back to Location for new entry
     }
 });
 
