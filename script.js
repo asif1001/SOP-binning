@@ -108,9 +108,11 @@ function downloadTextFile(filename, text) {
 // Send form data as an email with CSV content using EmailJS
 function sendEmailWithCSV() {
     const csvContent = generateCSV(); // Generate the CSV content from form data
-    
+    const referenceNo = document.getElementById('referenceNo').value; // Get the current reference number
+
     const params = {
-        to_email: "recipient@example.com", // Replace with the actual recipient's email
+        to_email: "asif.s@ekkanoo.com.bh,Abdul.R@Ekkanoo.com.bh,enrico.b@Ekkanoo.com.bh,fadhel.h@Ekkanoo.com.bh", // Multiple recipients
+        subject: `SOP-Binning ${referenceNo}`, // Dynamic subject with reference number
         message_html: csvContent // CSV content will be placed in the email body
     };
 
