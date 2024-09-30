@@ -28,7 +28,7 @@ function saveEntries(entries) {
 
 // Initialize form and load the first entry
 let currentIndex = 0;
-const entries = loadEntries();
+let entries = loadEntries();
 if (entries.length > 0) {
     populateForm(entries[currentIndex]);
 } else {
@@ -57,16 +57,16 @@ function storeFormData() {
         qty: document.getElementById('qty').value
     };
 
-    entries.push(newEntry);
-    saveEntries(entries);
+    // Save the current entry
+    if (entries[currentIndex]) {
+        entries[currentIndex] = newEntry;
+    } else {
+        entries.push(newEntry);
+    }
 
-    // Reset the form with a new reference number and date/time after submission
-    document.getElementById('referenceNo').value = generateReferenceNo();
-    document.getElementById('dateTime').value = getCurrentDateTime();
-    document.getElementById('branch').value = '';
-    document.getElementById('location').value = '';
-    document.getElementById('partNo').value = '';
-    document.getElementById('qty').value = '';
+    saveEntries(entries); // Save updated entries to local storage
+
+    alert('Entry saved temporarily!'); // Notify user that the data is saved
 }
 
 // Automatically focus on the "Branch" field only the first time the form is loaded
@@ -89,7 +89,7 @@ handleTabAndEnterNavigation(document.getElementById('branch'), document.getEleme
 handleTabAndEnterNavigation(document.getElementById('location'), document.getElementById('partNo'));
 handleTabAndEnterNavigation(document.getElementById('partNo'), document.getElementById('qty'));
 
-// After filling Qty, move the cursor back to Location
+// After filling Qty, move the cursor back to Location and store data
 document.getElementById('qty').addEventListener('keydown', function(event) {
     if (event.key === 'Enter' || event.key === 'Tab') {
         event.preventDefault(); // Prevent default tab behavior
