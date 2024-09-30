@@ -26,16 +26,6 @@ function saveEntries(entries) {
     localStorage.setItem('entries', JSON.stringify(entries));
 }
 
-// Function to populate the form with an entry
-function populateForm(entry) {
-    document.getElementById('referenceNo').value = entry.referenceNo;
-    document.getElementById('dateTime').value = entry.dateTime;
-    document.getElementById('branch').value = entry.branch;
-    document.getElementById('location').value = entry.location;
-    document.getElementById('partNo').value = entry.partNo;
-    document.getElementById('qty').value = entry.qty;
-}
-
 // Initialize form and load the first entry
 let currentIndex = 0;
 const entries = loadEntries();
@@ -46,13 +36,18 @@ if (entries.length > 0) {
     document.getElementById('dateTime').value = getCurrentDateTime();
 }
 
-// Automatically focus on the "Branch" field only the first time the form is loaded
-window.onload = function() {
-    document.getElementById('branch').focus();
-};
+// Function to populate the form with an entry
+function populateForm(entry) {
+    document.getElementById('referenceNo').value = entry.referenceNo;
+    document.getElementById('dateTime').value = entry.dateTime;
+    document.getElementById('branch').value = entry.branch;
+    document.getElementById('location').value = entry.location;
+    document.getElementById('partNo').value = entry.partNo;
+    document.getElementById('qty').value = entry.qty;
+}
 
-// Event handler for form submission
-document.getElementById('submitBtn').addEventListener('click', function() {
+// Function to store form data in local storage
+function storeFormData() {
     const newEntry = {
         referenceNo: document.getElementById('referenceNo').value,
         dateTime: document.getElementById('dateTime').value,
@@ -61,22 +56,46 @@ document.getElementById('submitBtn').addEventListener('click', function() {
         partNo: document.getElementById('partNo').value,
         qty: document.getElementById('qty').value
     };
-    
+
     entries.push(newEntry);
     saveEntries(entries);
-    
-    alert('Entry saved!');
-    
-    // Reset the form with new reference number and date/time
+
+    // Reset the form with a new reference number and date/time after submission
     document.getElementById('referenceNo').value = generateReferenceNo();
     document.getElementById('dateTime').value = getCurrentDateTime();
     document.getElementById('branch').value = '';
     document.getElementById('location').value = '';
     document.getElementById('partNo').value = '';
     document.getElementById('qty').value = '';
+}
 
-    // Focus back to Branch after submission
+// Automatically focus on the "Branch" field only the first time the form is loaded
+window.onload = function() {
     document.getElementById('branch').focus();
+};
+
+// Function to handle tab and enter key events
+function handleTabAndEnterNavigation(currentField, nextField) {
+    currentField.addEventListener('keydown', function(event) {
+        if (event.key === 'Enter' || event.key === 'Tab') {
+            event.preventDefault(); // Prevent default tab behavior
+            nextField.focus(); // Move focus to the next field
+        }
+    });
+}
+
+// Set up navigation between fields
+handleTabAndEnterNavigation(document.getElementById('branch'), document.getElementById('location'));
+handleTabAndEnterNavigation(document.getElementById('location'), document.getElementById('partNo'));
+handleTabAndEnterNavigation(document.getElementById('partNo'), document.getElementById('qty'));
+
+// After filling Qty, move the cursor back to Location
+document.getElementById('qty').addEventListener('keydown', function(event) {
+    if (event.key === 'Enter' || event.key === 'Tab') {
+        event.preventDefault(); // Prevent default tab behavior
+        storeFormData(); // Store data when moving back after Qty is filled
+        document.getElementById('location').focus(); // Move focus back to Location
+    }
 });
 
 // Event handler for Previous button
@@ -96,34 +115,5 @@ document.getElementById('nextBtn').addEventListener('click', function() {
         populateForm(entries[currentIndex]);
     } else {
         alert('No more entries.');
-    }
-});
-
-// Event handlers to manage tabbing behavior
-document.getElementById('qty').addEventListener('keydown', function(event) {
-    if (event.key === 'Enter' || event.key === 'Tab') {
-        event.preventDefault(); // Prevent default tab behavior
-        document.getElementById('location').focus(); // Move back to Location field
-    }
-});
-
-document.getElementById('branch').addEventListener('keydown', function(event) {
-    if (event.key === 'Enter' || event.key === 'Tab') {
-        event.preventDefault(); // Prevent default tab behavior
-        document.getElementById('location').focus(); // Move to Location field
-    }
-});
-
-document.getElementById('location').addEventListener('keydown', function(event) {
-    if (event.key === 'Enter' || event.key === 'Tab') {
-        event.preventDefault(); // Prevent default tab behavior
-        document.getElementById('partNo').focus(); // Move to Part No field
-    }
-});
-
-document.getElementById('partNo').addEventListener('keydown', function(event) {
-    if (event.key === 'Enter' || event.key === 'Tab') {
-        event.preventDefault(); // Prevent default tab behavior
-        document.getElementById('qty').focus(); // Move to Qty field
     }
 });
