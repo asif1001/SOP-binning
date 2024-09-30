@@ -36,12 +36,7 @@ let currentIndex = 0;
 let entries = loadEntries();
 let referenceNo = generateReferenceNo();
 let dateTime = getCurrentDateTime();
-if (entries.length > 0) {
-    currentIndex = entries.length - 1; // Start by showing the last entry
-    populateForm(entries[currentIndex]);
-} else {
-    resetForm();
-}
+resetForm();  // Ensure all fields except Reference No and Date/Time are empty
 
 // Function to populate the form with the current entry data
 function populateForm(entry) {
@@ -65,13 +60,6 @@ function resetForm() {
     document.getElementById('qty').value = '';
 }
 
-// Clear all form data and reset for new input
-function clearFormData() {
-    entries = []; // Clear entries array
-    saveEntries([]); // Clear entries from local storage
-    resetForm(); // Reset the form
-}
-
 // Store form data to local storage and prepare the form for a new entry
 function storeFormData() {
     const newEntry = {
@@ -87,7 +75,7 @@ function storeFormData() {
     saveEntries(entries);    // Save entries to local storage
 }
 
-// Generate Text content from the form entries for email and download
+// Generate Text content from the form entries for download and email
 function generateTextContent() {
     let textContent = "Reference No\tDate\tBranch\tLocation\tPart No\tQty\n";
     entries.forEach(entry => {
@@ -128,22 +116,15 @@ function sendEmailWithText() {
         });
 }
 
-// Submit button event listener to trigger email and save actions
-document.getElementById('submitBtn').addEventListener('click', function() {
-    // Store the current form data
-    storeFormData();
-
-    // Generate the text-formatted data
+// Download button event listener to download all saved entries in a text file
+document.getElementById('downloadBtn').addEventListener('click', function() {
     const textContent = generateTextContent();
-    
-    // Download the form data as a note file (formatted as text)
     downloadTextFile("form_data.txt", textContent);
+});
 
-    // Send the form data via email in text format
-    sendEmailWithText();
-
-    // Clear all form data after submission and reset the form for new data
-    clearFormData();
+// Submit button event listener to send the saved data via email
+document.getElementById('submitBtn').addEventListener('click', function() {
+    sendEmailWithText();  // Send the saved data via email
 });
 
 // Automatically focus on the "Branch" field when the form loads
