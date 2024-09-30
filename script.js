@@ -32,7 +32,6 @@ function saveEntries(entries) {
 }
 
 // Initialize form and load the last entry
-let currentIndex = 0;
 let entries = loadEntries();
 let referenceNo = generateReferenceNo();
 let dateTime = getCurrentDateTime();
@@ -55,6 +54,13 @@ function resetForm() {
     document.getElementById('referenceNo').value = referenceNo;
     document.getElementById('dateTime').value = dateTime;
     document.getElementById('branch').value = '';
+    document.getElementById('location').value = '';
+    document.getElementById('partNo').value = '';
+    document.getElementById('qty').value = '';
+}
+
+// Function to clear location, partNo, and qty fields
+function clearFields() {
     document.getElementById('location').value = '';
     document.getElementById('partNo').value = '';
     document.getElementById('qty').value = '';
@@ -116,6 +122,15 @@ function sendEmailWithText() {
         });
 }
 
+// Save and clear fields when Qty is entered
+document.getElementById('qty').addEventListener('keydown', function(event) {
+    if (event.key === 'Enter' || event.key === 'Tab') {
+        event.preventDefault(); // Prevent default tab behavior
+        storeFormData();  // Save the data when Qty is entered
+        clearFields();    // Clear fields for new entry
+    }
+});
+
 // Download button event listener to download all saved entries in a text file
 document.getElementById('downloadBtn').addEventListener('click', function() {
     const textContent = generateTextContent();
@@ -131,47 +146,3 @@ document.getElementById('submitBtn').addEventListener('click', function() {
 window.onload = function() {
     document.getElementById('branch').focus();
 };
-
-// Handle Tab/Enter key navigation between form fields
-function handleTabAndEnterNavigation(currentField, nextField) {
-    currentField.addEventListener('keydown', function(event) {
-        if (event.key === 'Enter' || event.key === 'Tab') {
-            event.preventDefault(); // Prevent default tab behavior
-            nextField.focus(); // Move focus to the next field
-        }
-    });
-}
-
-// Set up field navigation: Branch -> Location -> Part No -> Qty -> Location
-handleTabAndEnterNavigation(document.getElementById('branch'), document.getElementById('location'));
-handleTabAndEnterNavigation(document.getElementById('location'), document.getElementById('partNo'));
-handleTabAndEnterNavigation(document.getElementById('partNo'), document.getElementById('qty'));
-
-// After filling Qty, move back to Location and store the data
-document.getElementById('qty').addEventListener('keydown', function(event) {
-    if (event.key === 'Enter' || event.key === 'Tab') {
-        event.preventDefault(); // Prevent default tab behavior
-        storeFormData(); // Store the data in local storage
-        document.getElementById('location').focus(); // Move focus back to Location
-    }
-});
-
-// Handle Previous button to show the last entered data
-document.getElementById('prevBtn').addEventListener('click', function() {
-    if (currentIndex > 0) {
-        currentIndex--;
-        populateForm(entries[currentIndex]); // Show the previous entry
-    } else {
-        alert('No previous entries.');
-    }
-});
-
-// Handle Next button to show the next data entry or reset the form
-document.getElementById('nextBtn').addEventListener('click', function() {
-    if (currentIndex < entries.length - 1) {
-        currentIndex++;
-        populateForm(entries[currentIndex]); // Show the next entry
-    } else {
-        resetForm(); // Prepare for new entry if no next entry exists
-    }
-});
