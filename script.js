@@ -30,10 +30,10 @@ function saveEntries(entries) {
 let currentIndex = 0;
 let entries = loadEntries();
 if (entries.length > 0) {
+    currentIndex = entries.length - 1; // Start by showing the last entry
     populateForm(entries[currentIndex]);
 } else {
-    document.getElementById('referenceNo').value = generateReferenceNo();
-    document.getElementById('dateTime').value = getCurrentDateTime();
+    resetForm();
 }
 
 // Function to populate the form with an entry
@@ -46,7 +46,16 @@ function populateForm(entry) {
     document.getElementById('qty').value = entry.qty;
 }
 
-// Function to store form data in local storage
+// Function to reset the form while keeping Reference No, Date, and Branch
+function resetForm() {
+    document.getElementById('referenceNo').value = generateReferenceNo();
+    document.getElementById('dateTime').value = getCurrentDateTime();
+    document.getElementById('location').value = '';
+    document.getElementById('partNo').value = '';
+    document.getElementById('qty').value = '';
+}
+
+// Function to store form data in local storage and reset the form for a new entry
 function storeFormData() {
     const newEntry = {
         referenceNo: document.getElementById('referenceNo').value,
@@ -57,16 +66,17 @@ function storeFormData() {
         qty: document.getElementById('qty').value
     };
 
-    // Save the current entry
     if (entries[currentIndex]) {
+        // If the current entry is being edited, update it
         entries[currentIndex] = newEntry;
     } else {
+        // Otherwise, add a new entry
         entries.push(newEntry);
+        currentIndex = entries.length - 1; // Move index to the latest entry
     }
 
     saveEntries(entries); // Save updated entries to local storage
-
-    alert('Entry saved temporarily!'); // Notify user that the data is saved
+    resetForm(); // Clear form fields except Reference No, Date, and Branch
 }
 
 // Automatically focus on the "Branch" field only the first time the form is loaded
@@ -102,7 +112,7 @@ document.getElementById('qty').addEventListener('keydown', function(event) {
 document.getElementById('prevBtn').addEventListener('click', function() {
     if (currentIndex > 0) {
         currentIndex--;
-        populateForm(entries[currentIndex]);
+        populateForm(entries[currentIndex]); // Show previous entry
     } else {
         alert('No previous entries.');
     }
@@ -112,8 +122,8 @@ document.getElementById('prevBtn').addEventListener('click', function() {
 document.getElementById('nextBtn').addEventListener('click', function() {
     if (currentIndex < entries.length - 1) {
         currentIndex++;
-        populateForm(entries[currentIndex]);
+        populateForm(entries[currentIndex]); // Show next entry
     } else {
-        alert('No more entries.');
+        resetForm(); // Prepare for new entry if no next entry exists
     }
 });
