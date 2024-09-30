@@ -46,6 +46,11 @@ if (entries.length > 0) {
     document.getElementById('dateTime').value = getCurrentDateTime();
 }
 
+// Automatically focus on the "Branch" field only the first time the form is loaded
+window.onload = function() {
+    document.getElementById('branch').focus();
+};
+
 // Event handler for form submission
 document.getElementById('submitBtn').addEventListener('click', function() {
     const newEntry = {
@@ -69,6 +74,9 @@ document.getElementById('submitBtn').addEventListener('click', function() {
     document.getElementById('location').value = '';
     document.getElementById('partNo').value = '';
     document.getElementById('qty').value = '';
+
+    // Focus back to Branch after submission
+    document.getElementById('branch').focus();
 });
 
 // Event handler for Previous button
@@ -88,5 +96,34 @@ document.getElementById('nextBtn').addEventListener('click', function() {
         populateForm(entries[currentIndex]);
     } else {
         alert('No more entries.');
+    }
+});
+
+// Event handlers to manage tabbing behavior
+document.getElementById('qty').addEventListener('keydown', function(event) {
+    if (event.key === 'Enter' || event.key === 'Tab') {
+        event.preventDefault(); // Prevent default tab behavior
+        document.getElementById('location').focus(); // Move back to Location field
+    }
+});
+
+document.getElementById('branch').addEventListener('keydown', function(event) {
+    if (event.key === 'Enter' || event.key === 'Tab') {
+        event.preventDefault(); // Prevent default tab behavior
+        document.getElementById('location').focus(); // Move to Location field
+    }
+});
+
+document.getElementById('location').addEventListener('keydown', function(event) {
+    if (event.key === 'Enter' || event.key === 'Tab') {
+        event.preventDefault(); // Prevent default tab behavior
+        document.getElementById('partNo').focus(); // Move to Part No field
+    }
+});
+
+document.getElementById('partNo').addEventListener('keydown', function(event) {
+    if (event.key === 'Enter' || event.key === 'Tab') {
+        event.preventDefault(); // Prevent default tab behavior
+        document.getElementById('qty').focus(); // Move to Qty field
     }
 });
