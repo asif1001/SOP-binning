@@ -20,18 +20,18 @@ function getCurrentDateTime() {
     return now.toLocaleString(); // This will return the date and time in local format
 }
 
-// Function to load form entries from local storage
+// Load form entries from local storage
 function loadEntries() {
     const entries = JSON.parse(localStorage.getItem('entries')) || [];
     return entries;
 }
 
-// Function to save form entries to local storage
+// Save form entries to local storage
 function saveEntries(entries) {
     localStorage.setItem('entries', JSON.stringify(entries));
 }
 
-// Initialize form and load the last entry
+// Initialize form and reset values
 let entries = loadEntries();
 let referenceNo = generateReferenceNo();
 let dateTime = getCurrentDateTime();
@@ -59,14 +59,7 @@ function resetForm() {
     document.getElementById('qty').value = '';
 }
 
-// Clear location, part no, and qty fields when the cursor enters the location field
-document.getElementById('location').addEventListener('focus', function() {
-    document.getElementById('location').value = '';
-    document.getElementById('partNo').value = '';
-    document.getElementById('qty').value = '';
-});
-
-// Store form data to local storage and prepare the form for a new entry
+// Store form data in local storage and clear relevant fields
 function storeFormData() {
     const newEntry = {
         referenceNo: document.getElementById('referenceNo').value,
@@ -79,9 +72,15 @@ function storeFormData() {
 
     entries.push(newEntry);  // Add a new entry
     saveEntries(entries);    // Save entries to local storage
+
+    // Clear Location, Part No, and Qty after saving data
+    document.getElementById('location').value = '';
+    document.getElementById('partNo').value = '';
+    document.getElementById('qty').value = '';
+    document.getElementById('location').focus();  // Move focus back to Location
 }
 
-// Generate Text content from the form entries in a table format
+// Generate text content from the form entries in a table format
 function generateTextContent() {
     let header = `| ${padText('Reference No', 15)} | ${padText('Date', 20)} | ${padText('Branch', 15)} | ${padText('Location', 15)} | ${padText('Part No', 15)} | ${padText('Qty', 5)} |\n`;
     let separator = `| ${'-'.repeat(15)} | ${'-'.repeat(20)} | ${'-'.repeat(15)} | ${'-'.repeat(15)} | ${'-'.repeat(15)} | ${'-'.repeat(5)} |\n`;
@@ -129,14 +128,43 @@ function sendEmailWithText() {
         });
 }
 
-// Save and clear fields when Qty is entered
-document.getElementById('qty').addEventListener('keydown', function(event) {
-    if (event.key === 'Enter' || event.key === 'Tab') {
-        event.preventDefault(); // Prevent default tab behavior
-        storeFormData();  // Save the data when Qty is entered
-        document.getElementById('location').focus(); // Move focus back to Location for new entry
-    }
-});
+// Field navigation: from Location -> Part No -> Qty
+function setupFieldNavigation() {
+    const locationField = document.getElementById('location');
+    const partNoField = document.getElementById('partNo');
+    const qtyField = document.getElementById('qty');
+
+    // Move from Location to Part No
+    locationField.addEventListener('keydown', function(event) {
+        if (event.key === 'Enter' || event.key === 'Tab') {
+            event.preventDefault(); // Prevent default tab behavior
+            partNoField.focus(); // Move focus to Part No
+        }
+    });
+
+    // Move from Part No to Qty
+    partNoField.addEventListener('keydown', function(event) {
+        if (event.key === 'Enter' || event.key === 'Tab') {
+            event.preventDefault(); // Prevent default tab behavior
+            qtyField.focus(); // Move focus to Qty
+        }
+    });
+
+    // Move from Qty back to Location after saving data
+    qtyField.addEventListener('keydown', function(event) {
+        if (event.key === 'Enter' || event.key === 'Tab') {
+            event.preventDefault(); // Prevent default tab behavior
+            storeFormData();  // Save the data when Qty is entered
+            locationField.focus(); // Move focus back to Location for new entry
+        }
+    });
+}
+
+// Set up field navigation on page load
+window.onload = function() {
+    document.getElementById('branch').focus();  // Automatically focus on Branch field when form loads
+    setupFieldNavigation();  // Set up the sequence of cursor movement
+};
 
 // Download button event listener to download all saved entries in a text file
 document.getElementById('downloadBtn').addEventListener('click', function() {
@@ -148,8 +176,3 @@ document.getElementById('downloadBtn').addEventListener('click', function() {
 document.getElementById('submitBtn').addEventListener('click', function() {
     sendEmailWithText();  // Send the saved data via email
 });
-
-// Automatically focus on the "Branch" field when the form loads
-window.onload = function() {
-    document.getElementById('branch').focus();
-};
